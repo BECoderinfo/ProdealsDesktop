@@ -1,0 +1,305 @@
+import '../../../utils/imports.dart';
+
+class MangeOrders extends GetView<ManageOrderController> {
+  const MangeOrders({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    double hit = MediaQuery.of(context).size.height;
+    double wid = MediaQuery.of(context).size.width;
+
+    return GetBuilder<ManageOrderController>(
+      init: ManageOrderController(ctx: context),
+      builder: (controller) {
+        return Container(
+          height: hit,
+          width: wid,
+          color: AppColor.white,
+          padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Manage Total Orders',
+                style: AppTextStyle.semiBoldStyle(
+                  size: 32,
+                  color: AppColor.black300,
+                ),
+              ),
+              const Gap(20),
+              Obx(() => controller.isError.value
+                  ? const Gap(0)
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Show ${controller.orderList.length} orders',
+                          style: AppTextStyle.semiBoldStyle(
+                            size: 24,
+                            color: AppColor.smokyBlack,
+                          ),
+                        ),
+                      ],
+                    )),
+              const Gap(20),
+
+              // Always Show Table Header
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColor.tableHeaderBgColor,
+                  borderRadius: BorderRadius.circular(4),
+                  boxShadow: [
+                    BoxShadow(
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                      color: AppColor.black.withOpacity(0.5),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  columnWidths: const {
+                    0: FixedColumnWidth(50),
+                    1: FlexColumnWidth(),
+                    2: FlexColumnWidth(),
+                    3: FlexColumnWidth(),
+                    4: FlexColumnWidth(),
+                    5: FlexColumnWidth(),
+                    6: FlexColumnWidth(),
+                    7: FlexColumnWidth(),
+                  },
+                  children: [
+                    TableRow(
+                      children: [
+                        _tableHeader('No.'),
+                        _tableHeader('UserName'),
+                        _tableHeader('Business Name'),
+                        _tableHeader('Promo-code'),
+                        _tableHeader('Discount'),
+                        _tableHeader('Total Price'),
+                        _tableHeader('Status'),
+                        _tableHeader('Action'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Gap(20),
+
+              // Content
+              Obx(() {
+                if (controller.isError.value) {
+                  return _buildErrorWidget();
+                }
+
+                if (controller.isLoaded.value) {
+                  if (controller.orderList.isEmpty) {
+                    return _buildEmptyWidget("There are currently no orders to display.");
+                  } else {
+                    return Expanded(
+                      child: ListView.separated(
+                        itemBuilder: (context, index) {
+                          final order = controller.orderList[index];
+                          return Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Table(
+                              columnWidths: const {
+                                0: FixedColumnWidth(50),
+                                1: FlexColumnWidth(),
+                                2: FlexColumnWidth(),
+                                3: FlexColumnWidth(),
+                                4: FlexColumnWidth(),
+                                5: FlexColumnWidth(),
+                                6: FlexColumnWidth(),
+                                7: FlexColumnWidth(),
+                              },
+                              defaultVerticalAlignment:
+                                  TableCellVerticalAlignment.middle,
+                              children: [
+                                TableRow(
+                                  children: [
+                                    _tableCell('${index + 1}'),
+                                    _tableCell(order.userId?.userName ?? ""),
+                                    _tableCell(
+                                        order.businessId?.businessName ?? ""),
+                                    _tableCell(order.promocode ?? "Not used"),
+                                    _tableCell('${order.discount ?? 0}'),
+                                    _tableCell('${order.totalPrice ?? 0}'),
+                                    _statusCell(order.status),
+                                    Obx(() => controller.isProcess.value &&
+                                            controller.oId.value == order.sId
+                                        ? CustomCircularIndicator.indicator(
+                                            color1:
+                                                Colors.grey.withOpacity(0.5),
+                                            color: AppColor.black,
+                                          )
+                                        : Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(
+                                                    FluentIcons.red_eye),
+                                                onPressed: () {
+                                                  Navigator.pushNamed(
+                                                    context,
+                                                    '/view_order',
+                                                    arguments: order,
+                                                  );
+                                                },
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      WidgetStateProperty.all(
+                                                          Colors.blue),
+                                                ),
+                                              ),
+                                              const Gap(10),
+                                              IconButton(
+                                                icon: const Icon(
+                                                    FluentIcons.delete),
+                                                onPressed: () {
+                                                  controller.showDeleteDialog(
+                                                    ctx: context,
+                                                    i: index,
+                                                  );
+                                                },
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      WidgetStateProperty.all(
+                                                          Colors.red),
+                                                ),
+                                              ),
+                                            ],
+                                          )),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        separatorBuilder: (_, __) => const Gap(20),
+                        itemCount: controller.orderList.length,
+                      ),
+                    );
+                  }
+                }
+
+                return CustomCircularIndicator.indicator(
+                  color1: Colors.grey.withOpacity(0.5),
+                  color: AppColor.black,
+                );
+              }),
+              const Gap(20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _tableHeader(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Text(
+        text,
+        style: AppTextStyle.semiBoldStyle(
+          color: AppColor.black,
+          size: 20,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _tableCell(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Text(
+        text,
+        style: AppTextStyle.semiBoldStyle(
+          color: AppColor.tableRowTextColor,
+          size: 16,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _statusCell(String? status) {
+    Color color;
+    if (status == "Pending" || status == "Processing") {
+      color = AppColor.primary;
+    } else if (status == "Completed") {
+      color = AppColor.green;
+    } else {
+      color = AppColor.btnRedColor;
+    }
+
+    return Text(
+      status ?? "",
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: AppTextStyle.semiBoldStyle(
+        color: color,
+        size: 16,
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Gap(30),
+        const Icon(
+          FluentIcons.search_issue,
+          size: 80,
+          color: AppColor.black,
+        ),
+        const Gap(20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                "Something went wrong please try again.",
+                textAlign: TextAlign.center,
+                style: AppTextStyle.boldStyle(
+                  size: 20,
+                  color: AppColor.black,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyWidget(String message) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: AppTextStyle.boldStyle(
+                  size: 20,
+                  color: AppColor.black,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}

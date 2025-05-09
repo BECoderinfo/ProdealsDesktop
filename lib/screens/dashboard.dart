@@ -1,0 +1,372 @@
+import 'package:pro_deals_admin/modal/chart_modal.dart';
+
+import '../../../utils/imports.dart';
+import 'package:pro_deals_admin/controllers/dashboard/dashboard_controller.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
+class Dashboard extends StatelessWidget {
+  const Dashboard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    double hit = MediaQuery.of(context).size.height;
+    double wid = MediaQuery.of(context).size.width;
+    return GetBuilder(
+      init: DashBoardController(ctx: context),
+      builder: (controller) {
+        return Container(
+          height: hit,
+          width: wid,
+          color: AppColor.white,
+          padding: const EdgeInsets.only(top: 20, left: 20),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Manage Earnings',
+                  style: AppTextStyle.semiBoldStyle(
+                    size: 32,
+                    color: AppColor.black300,
+                  ),
+                ),
+                const Gap(20),
+                Obx(
+                  () => controller.isError.value
+                      ? const Gap(0)
+                      : Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Wrap(
+                            spacing: 30,
+                            runSpacing: 30,
+                            children: [
+                              DashboardCard(
+                                height: hit,
+                                width: wid,
+                                value:
+                                    "₹ ${controller.dashBoardDataModel.value?.totalEarning ?? '0'}",
+                                svgAssetPath: 'assets/images/svg/money.svg',
+                                imageAssetPath: 'assets/images/earnings.png',
+                                subTitle: "Total Earnings",
+                              ),
+                              DashboardCard(
+                                height: hit,
+                                width: wid,
+                                value:
+                                    '${controller.dashBoardDataModel.value?.totalOrders ?? '0'}',
+                                svgAssetPath: 'assets/images/svg/cart.svg',
+                                imageAssetPath: 'assets/images/Frame.png',
+                                subTitle: "Total Orders",
+                              ),
+                              DashboardCard(
+                                height: hit,
+                                width: wid,
+                                value:
+                                    '${controller.dashBoardDataModel.value?.offerData ?? '0'}',
+                                svgAssetPath: 'assets/images/svg/cash.svg',
+                                imageAssetPath: 'assets/images/cash_pay.png',
+                                subTitle: "Redeemed Offers",
+                              ),
+                              DashboardCard(
+                                height: hit,
+                                width: wid,
+                                value:
+                                    '${controller.dashBoardDataModel.value?.activeOffers ?? '0'}',
+                                svgAssetPath: 'assets/images/svg/feedback.svg',
+                                imageAssetPath: 'assets/images/c_grap.png',
+                                subTitle: "Active Offers",
+                              ),
+                              DashboardCard(
+                                height: hit,
+                                width: wid,
+                                value:
+                                    '${controller.dashBoardDataModel.value?.todaysOrders ?? '0'}',
+                                svgAssetPath: 'assets/images/svg/sale.svg',
+                                imageAssetPath: 'assets/images/sales.png',
+                                subTitle: "Today's Orders",
+                              ),
+                            ],
+                          ),
+                        ),
+                ),
+                const Gap(20),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                FluentTheme(
+                                  data: FluentThemeData.light(),
+                                  child: Obx(
+                                    () => DropDownButton(
+                                      title: Text(
+                                        controller.title.value,
+                                        style: const TextStyle(
+                                            color: Colors.black),
+                                      ),
+                                      items: [
+                                        MenuFlyoutItem(
+                                          text: const Text('Weekly'),
+                                          onPressed: () {
+                                            controller.updateChartData(
+                                                title: 'weekly');
+                                          },
+                                        ),
+                                        MenuFlyoutItem(
+                                          text: const Text('monthly'),
+                                          onPressed: () {
+                                            controller.updateChartData(
+                                                title: 'monthly');
+                                          },
+                                        ),
+                                        MenuFlyoutItem(
+                                          text: const Text('yearly'),
+                                          onPressed: () {
+                                            controller.updateChartData(
+                                                title: 'yearly');
+                                          },
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Gap(10),
+                            Obx(
+                              () => controller.isError.value
+                                  ? const Gap(0)
+                                  : controller.chartDataList.isEmpty
+                                      ? const Gap(0)
+                                      : Column(
+                                          children: [
+                                            _buildChartContainer(Chart(
+                                                data:
+                                                    controller.chartDataList)),
+                                          ],
+                                        ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Expanded(child: SizedBox()),
+                    ],
+                  ),
+                ),
+                const Gap(20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildChartContainer(Widget chart) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 4,
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: chart,
+    );
+  }
+}
+
+class DashboardCard extends StatelessWidget {
+  final double height;
+  final double width;
+  final String value;
+  final String svgAssetPath;
+  final String imageAssetPath;
+  final String subTitle;
+
+  const DashboardCard({
+    super.key,
+    required this.height,
+    required this.width,
+    required this.value,
+    required this.svgAssetPath,
+    required this.imageAssetPath,
+    required this.subTitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height / 4.4,
+      width: width / 4,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            offset: const Offset(0, 2),
+            blurRadius: 2,
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 26,
+            top: 20,
+            child: SvgPicture.asset(svgAssetPath),
+          ),
+          Center(
+            child: SizedBox(
+              height: width / 18,
+              child: Padding(
+                padding: EdgeInsets.only(left: width / 40),
+                child: Row(
+                  children: [
+                    Container(
+                      width: width / 18,
+                      height: width / 18,
+                      decoration: BoxDecoration(
+                        color: const Color(0xffFBE4AA),
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 2,
+                            offset: const Offset(4, 4),
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Image.asset(imageAssetPath),
+                    ),
+                    const Gap(20),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          value,
+                          style: GoogleFonts.openSans(
+                            fontSize: width / 70,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Text(
+                            subTitle,
+                            style: GoogleFonts.openSans(
+                              fontSize: width / 70,
+                              color: Colors.black,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class Chart extends StatefulWidget {
+  final List<ChartModal> data;
+
+  Chart({super.key, required this.data});
+
+  @override
+  ChartState createState() => ChartState();
+}
+
+class ChartState extends State<Chart> {
+  late List<_ChartData> data;
+
+  late TooltipBehavior _tooltip;
+  late CrosshairBehavior _crosshair;
+
+  @override
+  void initState() {
+    data = widget.data
+        .map((e) => _ChartData("${e.tital}", e.revenue!.toDouble()))
+        .toList();
+    _tooltip = TooltipBehavior(
+        enable: true,
+        textStyle: const TextStyle(color: Colors.white),
+        color: Colors.black);
+
+    _crosshair = CrosshairBehavior(
+      enable: true,
+      lineType: CrosshairLineType.both,
+      lineColor: Colors.black,
+      lineWidth: 1,
+      activationMode: ActivationMode.longPress,
+    );
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SfCartesianChart(
+        title: const ChartTitle(
+            text: 'Revenue', textStyle: TextStyle(color: Colors.black)),
+        primaryXAxis: const CategoryAxis(
+          axisLine: AxisLine(color: Colors.black),
+          labelStyle: TextStyle(color: Colors.black),
+          majorTickLines: MajorTickLines(color: Colors.grey),
+          majorGridLines: MajorGridLines(color: Colors.grey),
+        ),
+        primaryYAxis: const NumericAxis(
+          minimum: 0,
+          maximum: null,
+          axisLine: AxisLine(color: Colors.white, width: 1),
+          labelStyle: TextStyle(color: Colors.grey),
+          majorGridLines: MajorGridLines(color: Colors.grey, width: 1),
+          majorTickLines: MajorTickLines(
+            color: Colors.black,
+          ),
+        ),
+        crosshairBehavior: _crosshair,
+        tooltipBehavior: _tooltip,
+        plotAreaBorderColor: Colors.black,
+        series: <CartesianSeries<_ChartData, String>>[
+          ColumnSeries<_ChartData, String>(
+            dataSource: data,
+            xValueMapper: (_ChartData data, _) => data.x,
+            yValueMapper: (_ChartData data, _) => data.y,
+            name: 'Revenue',
+            color: const Color(0xffFBE4AA),
+            width: 0.5,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartData {
+  _ChartData(this.x, this.y);
+
+  final String x;
+  final double y;
+}

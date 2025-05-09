@@ -1,0 +1,141 @@
+import '../../utils/imports.dart';
+
+class PlanAddUpdateController extends GetxController {
+  final GlobalKey planKey = GlobalKey();
+
+  final TextEditingController planName = TextEditingController();
+  final TextEditingController planPrice = TextEditingController();
+  final TextEditingController planCount = TextEditingController();
+
+  RxString planNameError = "".obs;
+  RxString planPriceError = "".obs;
+  RxString planCountError = "".obs;
+
+  RxList<TextEditingController> descriptionList = <TextEditingController>[].obs;
+  RxList<String> descriptionErrorList = <String>[].obs;
+
+  RxString selectedDuration = "Monthly".obs;
+  List<String> durationList = [
+    "Daily",
+    "Weekly",
+    "Monthly",
+    "Quarterly",
+    "Yearly"
+  ];
+
+  RxBool isEdit = false.obs;
+  RxBool isProcess = false.obs;
+
+  dynamic oldData;
+
+  PlanAddUpdateController({this.oldData, required data}) {
+    if (oldData != null) {
+      isEdit.value = true;
+      setOldData(oldData);
+    } else {
+      addInitialDescriptionField();
+    }
+  }
+
+  void setOldData(dynamic data) {
+    planName.text = data['planName'] ?? "";
+    planPrice.text = data['planPrice'].toString();
+    planCount.text = data['planCount'].toString();
+    selectedDuration.value = data['planDuration'] ?? "Monthly";
+
+    List<dynamic> descList = data['planDescription'] ?? [];
+    for (var desc in descList) {
+      descriptionList.add(TextEditingController(text: desc));
+      descriptionErrorList.add("");
+    }
+
+    if (descriptionList.isEmpty) {
+      addInitialDescriptionField();
+    }
+  }
+
+  void addInitialDescriptionField() {
+    descriptionList.add(TextEditingController());
+    descriptionErrorList.add("");
+  }
+
+  void checkValidation({required BuildContext ctx}) {
+    bool hasError = false;
+
+    if (planName.text.trim().isEmpty) {
+      planNameError.value = "Enter plan name";
+      hasError = true;
+    }
+
+    if (planPrice.text.trim().isEmpty) {
+      planPriceError.value = "Enter plan price";
+      hasError = true;
+    } else if (double.tryParse(planPrice.text.trim()) == null) {
+      planPriceError.value = "Price must be a number";
+      hasError = true;
+    }
+
+    if (planCount.text.trim().isEmpty) {
+      planCountError.value = "Enter plan count";
+      hasError = true;
+    } else if (int.tryParse(planCount.text.trim()) == null) {
+      planCountError.value = "Count must be a number";
+      hasError = true;
+    }
+
+    for (int i = 0; i < descriptionList.length; i++) {
+      if (descriptionList[i].text.trim().isEmpty) {
+        descriptionErrorList[i] = "Required";
+        hasError = true;
+      } else {
+        descriptionErrorList[i] = "";
+      }
+    }
+
+    if (!hasError) {
+      submitData(ctx: ctx);
+    }
+  }
+
+  void submitData({required BuildContext ctx}) async {
+    isProcess.value = true;
+
+    Map<String, dynamic> payload = {
+      "planName": planName.text.trim(),
+      "planPrice": double.parse(planPrice.text.trim()),
+      "planCount": int.parse(planCount.text.trim()),
+      "planDuration": selectedDuration.value.toLowerCase(),
+      "planDescription": descriptionList.map((e) => e.text.trim()).toList(),
+    };
+
+    var res = await ApiService.postApi(Apis.createMembershipPlan, body: payload, ctx);
+
+    if (res != null) {
+      ShowToast.toast(msg: res['message'], ctx: ctx);
+    }
+
+    await Future.delayed(const Duration(seconds: 2)); // Simulate API call
+
+    if (isEdit.value) {
+      debugPrint("Updating Plan: $payload");
+      // Call update API here
+    } else {
+      debugPrint("Creating Plan: $payload");
+      // Call create API here
+    }
+
+    isProcess.value = false;
+    Navigator.pop(ctx); // Go back to plan list
+  }
+
+  @override
+  void dispose() {
+    planName.dispose();
+    planPrice.dispose();
+    planCount.dispose();
+    for (var controller in descriptionList) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+}

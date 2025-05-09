@@ -1,0 +1,281 @@
+import 'package:pro_deals_admin/controllers/manage_earning/Manage_earning_Controller.dart';
+import 'package:pro_deals_admin/modal/chart_modal.dart';
+
+import '../../../utils/imports.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+
+class ManageEarning extends StatelessWidget {
+  const ManageEarning({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    double hit = MediaQuery.of(context).size.height;
+    double wid = MediaQuery.of(context).size.width;
+    return GetBuilder(
+      init: ManageEarningController(ctx: context),
+      builder: (controller) {
+        return Container(
+          height: hit,
+          width: wid,
+          decoration: const BoxDecoration(color: Colors.white),
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Manage Earnings',
+                      style: AppTextStyle.semiBoldStyle(
+                        size: 32,
+                        color: AppColor.black300,
+                      ),
+                    ),
+                    const Spacer(),
+                    Obx(
+                      () => DropDownButton(
+                        title: Text(
+                          "${controller.title.value} >",
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        menuColor: Colors.black,
+                        items: [
+                          MenuFlyoutItem(
+                            text: const Text('Weekly'),
+                            onPressed: () {
+                              controller.updateChartData(title: 'weekly');
+                            },
+                          ),
+                          MenuFlyoutItem(
+                            text: const Text('Monthly'),
+                            onPressed: () {
+                              controller.updateChartData(title: 'monthly');
+                            },
+                          ),
+                          MenuFlyoutItem(
+                            text: const Text('Yearly'),
+                            onPressed: () {
+                              controller.updateChartData(title: 'yearly');
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Obx(
+                        () => controller.isError.value
+                            ? const SizedBox.shrink()
+                            : controller.chartDataList.isEmpty
+                                ? const SizedBox.shrink()
+                                : _buildChartContainer(RevenueChart(
+                                    data: controller.chartDataList,
+                                  )),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Obx(
+                        () => controller.isError.value
+                            ? const SizedBox.shrink()
+                            : controller.chartDataList.isEmpty
+                                ? const SizedBox.shrink()
+                                : _buildChartContainer(OrderChart(
+                                    data: controller.chartDataList,
+                                  )),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildChartContainer(Widget chart) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 4,
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: chart,
+    );
+  }
+}
+
+class RevenueChart extends StatefulWidget {
+  final List<ChartModal> data;
+
+  RevenueChart({super.key, required this.data});
+
+  @override
+  RevenueChartState createState() => RevenueChartState();
+}
+
+class RevenueChartState extends State<RevenueChart> {
+  late List<_ChartData> data;
+
+  late TooltipBehavior _tooltip;
+  late CrosshairBehavior _crosshair;
+
+  @override
+  void initState() {
+    data = widget.data
+        .map((e) => _ChartData("${e.tital}", e.revenue!.toDouble()))
+        .toList();
+    _tooltip = TooltipBehavior(
+      enable: true,
+      textStyle: const TextStyle(color: Colors.white),
+      color: Colors.black,
+    );
+
+    _crosshair = CrosshairBehavior(
+      enable: true,
+      lineType: CrosshairLineType.both,
+      lineColor: Colors.black,
+      lineWidth: 1,
+      activationMode: ActivationMode.longPress,
+    );
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SfCartesianChart(
+        title: const ChartTitle(
+            text: 'Revenue', textStyle: TextStyle(color: Colors.black)),
+        primaryXAxis: const CategoryAxis(
+          axisLine: AxisLine(color: Colors.black),
+          labelStyle: TextStyle(color: Colors.black),
+          majorTickLines: MajorTickLines(color: Colors.grey),
+          majorGridLines: MajorGridLines(color: Colors.grey),
+        ),
+        primaryYAxis: const NumericAxis(
+          minimum: 0,
+          axisLine: AxisLine(color: Colors.white, width: 1),
+          labelStyle: TextStyle(color: Colors.grey),
+          majorGridLines: MajorGridLines(color: Colors.grey, width: 1),
+          majorTickLines: MajorTickLines(
+            color: Colors.black,
+          ),
+        ),
+        crosshairBehavior: _crosshair,
+        tooltipBehavior: _tooltip,
+        plotAreaBorderColor: Colors.black,
+        series: <CartesianSeries<_ChartData, String>>[
+          ColumnSeries<_ChartData, String>(
+            dataSource: data,
+            xValueMapper: (_ChartData data, _) => data.x,
+            yValueMapper: (_ChartData data, _) => data.y,
+            name: 'Revenue',
+            color: const Color(0xffFBE4AA),
+            width: 0.5,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OrderChart extends StatefulWidget {
+  final List<ChartModal> data;
+
+  OrderChart({super.key, required this.data});
+
+  @override
+  OrderChartState createState() => OrderChartState();
+}
+
+class OrderChartState extends State<OrderChart> {
+  late List<_ChartData> data;
+
+  late TooltipBehavior _tooltip;
+  late CrosshairBehavior _crosshair;
+
+  @override
+  void initState() {
+    data = widget.data
+        .map((e) => _ChartData("${e.tital}", e.orders!.toDouble()))
+        .toList();
+    _tooltip = TooltipBehavior(
+      enable: true,
+      textStyle: const TextStyle(color: Colors.white),
+      color: Colors.black,
+    );
+
+    _crosshair = CrosshairBehavior(
+      enable: true,
+      lineType: CrosshairLineType.both,
+      lineColor: Colors.black,
+      lineWidth: 1,
+      activationMode: ActivationMode.longPress,
+    );
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: SfCartesianChart(
+        title: const ChartTitle(
+            text: 'Orders', textStyle: TextStyle(color: Colors.black)),
+        primaryXAxis: const CategoryAxis(
+          axisLine: AxisLine(color: Colors.black),
+          labelStyle: TextStyle(color: Colors.black),
+          majorTickLines: MajorTickLines(color: Colors.grey),
+          majorGridLines: MajorGridLines(color: Colors.grey),
+        ),
+        primaryYAxis: const NumericAxis(
+          minimum: 0,
+          axisLine: AxisLine(color: Colors.white, width: 1),
+          labelStyle: TextStyle(color: Colors.grey),
+          majorGridLines: MajorGridLines(color: Colors.grey, width: 1),
+          majorTickLines: MajorTickLines(
+            color: Colors.black,
+          ),
+        ),
+        crosshairBehavior: _crosshair,
+        tooltipBehavior: _tooltip,
+        plotAreaBorderColor: Colors.black,
+        series: <CartesianSeries<_ChartData, String>>[
+          ColumnSeries<_ChartData, String>(
+            dataSource: data,
+            xValueMapper: (_ChartData data, _) => data.x,
+            yValueMapper: (_ChartData data, _) => data.y,
+            name: 'Orders',
+            color: const Color(0xffFBE4AA),
+            width: 0.5,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChartData {
+  _ChartData(this.x, this.y);
+
+  final String x;
+  final double y;
+}

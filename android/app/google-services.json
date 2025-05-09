@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "213743447642",
+    "project_id": "pro-deals-159d1",
+    "storage_bucket": "pro-deals-159d1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213743447642:android:4b9d40cc5e66f051faf263",
+        "android_client_info": {
+          "package_name": "com.example.pro_deals"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "213743447642-fns22hpnqm2t69ki52he3j5th1aqe3eh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pro_deals",
+            "certificate_hash": "dbb5ba3cd65a3ab9cac5d167829ed7b1348a0ae1"
+          }
+        },
+        {
+          "client_id": "213743447642-58ditormr3j176rulg16ebh78c19kcro.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwqfiGW-hoLU4DDcNFovTZtq8rQ6qCIKM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "213743447642-58ditormr3j176rulg16ebh78c19kcro.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "213743447642-bkhkl825ss55k1nos61guk9te73623gq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.proDeals.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:213743447642:android:81eaf343b78c3613faf263",
+        "android_client_info": {
+          "package_name": "com.example.pro_deals_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "213743447642-58ditormr3j176rulg16ebh78c19kcro.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBwqfiGW-hoLU4DDcNFovTZtq8rQ6qCIKM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "213743447642-58ditormr3j176rulg16ebh78c19kcro.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "213743447642-bkhkl825ss55k1nos61guk9te73623gq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.proDeals.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
