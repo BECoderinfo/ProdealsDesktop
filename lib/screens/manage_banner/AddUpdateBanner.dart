@@ -193,33 +193,55 @@ class AddUpdateBanner extends StatelessWidget {
                                                       .tableRowTextColor,
                                                 ),
                                               )
-                                            : ComboBox<String>(
-                                                value: controller
-                                                    .selectedOffer.value,
-                                                style: AppTextStyle.mediumStyle(
-                                                  color: Colors.black,
-                                                  size: 15,
+                                            : ConstrainedBox(
+                                                constraints: BoxConstraints(
+                                                    maxWidth: wid / 3.7),
+                                                // same as the image box
+                                                child: ComboBox<String>(
+                                                  value: controller
+                                                      .selectedOffer.value,
+                                                  style:
+                                                      AppTextStyle.mediumStyle(
+                                                    color: Colors.black,
+                                                    size: 15,
+                                                  ),
+                                                  placeholder: const Text(
+                                                      "Select Offer"),
+                                                  items: controller.offerList
+                                                      .map((e) {
+                                                    final displayText =
+                                                        "${e.description ?? ""} | ${e.businessId?.businessName ?? ""}";
+                                                    return ComboBoxItem(
+                                                      value: displayText,
+                                                      child: ConstrainedBox(
+                                                        constraints:
+                                                            BoxConstraints(
+                                                                maxWidth:
+                                                                    wid / 4.8),
+                                                        child: Tooltip(
+                                                          message: displayText,
+                                                          child: Text(
+                                                            displayText,
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style:
+                                                                const TextStyle(
+                                                                    fontSize:
+                                                                        14),
+                                                            softWrap: false,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                  onChanged: (value) {
+                                                    if (value == null) return;
+                                                    controller.selectedOffer
+                                                        .value = value;
+                                                  },
                                                 ),
-                                                placeholder:
-                                                    const Text("Select Offer"),
-                                                items: controller.offerList
-                                                    .map((e) {
-                                                  return ComboBoxItem(
-                                                    value:
-                                                        "${e.description ?? ""} | ${e.businessId?.businessName ?? ""}",
-                                                    child: Text(
-                                                      "${e.description ?? ""} | ${e.businessId?.businessName ?? ""}",
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                                onChanged: (value) {
-                                                  if (value == null) return;
-                                                  controller.selectedOffer
-                                                      .value = value;
-                                                },
                                               )
                                         : CustomCircularIndicator.indicator(
                                             color1:

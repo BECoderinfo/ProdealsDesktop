@@ -69,10 +69,15 @@ class offers extends GetView<ManageOfferDealsController> {
                   alignment: Alignment.center,
                   child: Table(
                     columnWidths: const {
-                      0: FixedColumnWidth(50),
-                      4: FixedColumnWidth(100),
-                      6: FixedColumnWidth(120),
+                      0: FixedColumnWidth(50), // No.
+                      1: FlexColumnWidth(), // Offer description
+                      2: FlexColumnWidth(), // Offer price
+                      3: FlexColumnWidth(), // Valid on
+                      4: FlexColumnWidth(), // Status
+                      5: FlexColumnWidth(), // Business detail
+                      6: FixedColumnWidth(150), // Action
                     },
+                    defaultVerticalAlignment: TableCellVerticalAlignment.middle,
                     children: [_buildTableHeader()],
                   ),
                 );
@@ -136,18 +141,191 @@ class offers extends GetView<ManageOfferDealsController> {
       'Action'
     ];
     return TableRow(
-      children: headers.map((h) => _buildHeaderCell(h)).toList(),
+      children: headers
+          .map((h) => _buildTableCell(Text(
+                h,
+                style:
+                    AppTextStyle.semiBoldStyle(color: AppColor.black, size: 20),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              )))
+          .toList(),
     );
   }
 
-  Widget _buildHeaderCell(String label) {
+  Widget _buildTableCell(Widget child) {
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6),
+      child: child,
+    );
+  }
+
+  Widget _buildMultilineText(String text, int maxLines) {
+    return Text(
+      text,
+      style: AppTextStyle.mediumStyle(
+        color: AppColor.tableRowTextColor,
+        size: 14,
+      ),
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildOfferRow(
+    BuildContext context,
+    ManageOfferDealsController controller,
+    int index,
+  ) {
+    final offer = controller.allOffer[index];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Table(
+        columnWidths: const {
+          0: FixedColumnWidth(50), // No.
+          1: FlexColumnWidth(), // Offer description
+          2: FlexColumnWidth(), // Offer price
+          3: FlexColumnWidth(), // Valid on
+          4: FlexColumnWidth(), // Status
+          5: FlexColumnWidth(), // Business detail
+          6: FixedColumnWidth(150), // Action
+        },
+        defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+        children: [
+          TableRow(
+            children: [
+              _buildTableCell(Text('${index + 1}',
+                  style: AppTextStyle.semiBoldStyle(
+                      color: AppColor.tableRowTextColor, size: 16))),
+              _buildTableCell(_buildMultilineText(offer.description ?? "", 2)),
+              _buildTableCell(_buildMultilineText(
+                'Product: ₹${offer.productPrice ?? 0}\n'
+                'Discount: ${offer.offerPrice ?? 0} ${offer.offertype == "Amount" ? '₹' : '%'}\n'
+                'Pay: ₹${offer.paymentAmount ?? 0}',
+                3,
+              )),
+              _buildTableCell(_buildMultilineText(offer.validOn ?? "", 1)),
+              _buildTableCell(_buildStatusCell(offer.isActive ?? false)),
+              _buildTableCell(_buildBusinessDetailCell(offer)),
+              _buildTableCell(
+                  _buildActionCell(context, controller, index, offer)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusCell(bool isActive) {
+    final bgColor = isActive
+        ? Colors.green.withValues(alpha: 0.2)
+        : Colors.red.withValues(alpha: 0.2);
+    final textColor = isActive ? Colors.green : Colors.red;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: bgColor,
+        border: Border.all(
+          color: textColor,
+          width: 1.2,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Text(
-        label,
-        style: AppTextStyle.semiBoldStyle(color: AppColor.black, size: 20),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
+        isActive ? 'Active' : 'Inactive',
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildBusinessDetailCell(offer) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Business name",
+            style: AppTextStyle.semiBoldStyle(
+                color: AppColor.tableRowTextColor, size: 16)),
+        Text(offer.businessId?.businessName ?? "",
+            style: AppTextStyle.mediumStyle(
+                color: AppColor.tableRowTextColor, size: 14)),
+        Text("Business contact",
+            style: AppTextStyle.semiBoldStyle(
+                color: AppColor.tableRowTextColor, size: 16)),
+        Text(offer.businessId?.contactNumber ?? "",
+            style: AppTextStyle.mediumStyle(
+                color: AppColor.tableRowTextColor, size: 14)),
+      ],
+    );
+  }
+
+  Widget _buildActionCell(
+    BuildContext context,
+    ManageOfferDealsController controller,
+    int index,
+    dynamic offer,
+  ) {
+    return Obx(() {
+      bool isLoading =
+          !controller.isProcess.value && offer.sId == controller.oId.value;
+      if (isLoading) {
+        return CustomCircularIndicator.indicator(
+          color1: Colors.white.withValues(alpha: 0.25),
+          color: AppColor.primary,
+        );
+      }
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          _buildIconButton(
+            icon: FluentIcons.edit,
+            color: Colors.green,
+            onPressed: () {
+              controller.showAddUpdateDialog(
+                ctx: context,
+                title: "Update offer",
+                isEdit: true,
+                offer: offer,
+              );
+            },
+          ),
+          _buildIconButton(
+            icon: FluentIcons.red_eye,
+            color: Colors.blue,
+            onPressed: () {
+              controller.viewDetailDialog(ctx: context, offer: offer);
+            },
+          ),
+          _buildIconButton(
+            icon: FluentIcons.delete,
+            color: Colors.red,
+            onPressed: () {
+              controller.showDeleteDialog(ctx: context, i: index);
+            },
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildIconButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 5),
+      child: IconButton(
+        icon: Icon(icon, color: AppColor.white),
+        onPressed: onPressed,
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(color),
+        ),
       ),
     );
   }
@@ -192,187 +370,6 @@ class offers extends GetView<ManageOfferDealsController> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _buildOfferRow(
-    BuildContext context,
-    ManageOfferDealsController controller,
-    int index,
-  ) {
-    final offer = controller.allOffer[index];
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Table(
-        columnWidths: const {
-          0: FixedColumnWidth(50),
-          4: FixedColumnWidth(100),
-          6: FixedColumnWidth(120),
-        },
-        children: [
-          TableRow(
-            children: [
-              Text(
-                '${index + 1}',
-                style: AppTextStyle.semiBoldStyle(
-                  color: AppColor.tableRowTextColor,
-                  size: 16,
-                ),
-              ),
-              _buildTextCell(offer.description ?? "", 2),
-              _buildTextCell(
-                'Product price: ${offer.productPrice ?? 0} ₹\n'
-                'Discount price: ${offer.offerPrice ?? 0} ${offer.offertype == "Amount" ? '₹' : '%'}\n'
-                'Payment amount: ${offer.paymentAmount ?? 0} ₹',
-                3,
-              ),
-              _buildTextCell(offer.validOn ?? "", 1),
-              _buildStatusCell(offer.isActive ?? false),
-              _buildBusinessDetailCell(offer),
-              _buildActionCell(context, controller, index, offer),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextCell(String text, int maxLines) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Text(
-        text,
-        style: AppTextStyle.semiBoldStyle(
-          color: AppColor.tableRowTextColor,
-          size: 16,
-        ),
-        overflow: TextOverflow.ellipsis,
-        maxLines: maxLines,
-      ),
-    );
-  }
-
-  Widget _buildStatusCell(bool isActive) {
-    return Container(
-      alignment: Alignment.center,
-      height: 30,
-      width: 30,
-      decoration: BoxDecoration(
-        color: isActive ? AppColor.btnGreenColor : AppColor.btnRedColor,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Icon(
-        isActive ? FluentIcons.check_mark : FluentIcons.clear,
-        color: AppColor.white,
-        size: isActive ? 22 : 15,
-      ),
-    );
-  }
-
-  Widget _buildBusinessDetailCell(offer) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Business name",
-            style: AppTextStyle.semiBoldStyle(
-              color: AppColor.tableRowTextColor,
-              size: 16,
-            ),
-          ),
-          Text(
-            offer.businessId?.businessName ?? "",
-            style: AppTextStyle.mediumStyle(
-              color: AppColor.tableRowTextColor,
-              size: 14,
-            ),
-          ),
-          Text(
-            "Business contact",
-            style: AppTextStyle.semiBoldStyle(
-              color: AppColor.tableRowTextColor,
-              size: 16,
-            ),
-          ),
-          Text(
-            offer.businessId?.contactNumber ?? "",
-            style: AppTextStyle.mediumStyle(
-              color: AppColor.tableRowTextColor,
-              size: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionCell(
-    BuildContext context,
-    ManageOfferDealsController controller,
-    int index,
-    dynamic offer,
-  ) {
-    return Obx(() {
-      bool isLoading =
-          !controller.isProcess.value && offer.sId == controller.oId.value;
-      if (isLoading) {
-        return CustomCircularIndicator.indicator(
-          color1: Colors.white.withValues(alpha: 0.25),
-          color: AppColor.primary,
-        );
-      }
-      return Expanded(
-        child: Wrap(
-          runSpacing: 10,
-          children: [
-            _buildIconButton(
-              icon: FluentIcons.edit,
-              color: Colors.green,
-              onPressed: () {
-                controller.showAddUpdateDialog(
-                  ctx: context,
-                  title: "Update offer",
-                  isEdit: true,
-                  offer: offer,
-                );
-              },
-            ),
-            _buildIconButton(
-              icon: FluentIcons.red_eye,
-              color: Colors.blue,
-              onPressed: () {
-                controller.viewDetailDialog(ctx: context, offer: offer);
-              },
-            ),
-            _buildIconButton(
-              icon: FluentIcons.delete,
-              color: Colors.red,
-              onPressed: () {
-                controller.showDeleteDialog(ctx: context, i: index);
-              },
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  Widget _buildIconButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 5),
-      child: IconButton(
-        icon: Icon(icon),
-        onPressed: onPressed,
-        style: ButtonStyle(
-          backgroundColor: WidgetStateProperty.all(color),
-        ),
-      ),
     );
   }
 }

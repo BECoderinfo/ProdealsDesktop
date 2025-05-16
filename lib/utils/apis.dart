@@ -5,7 +5,7 @@ class Apis {
   static const Duration timeout = Duration(minutes: 5);
 
   // static const String serverAddress = "http://141.148.196.197:3001";
-  static const String serverAddress = "http://192.168.1.7:3001";
+  static const String serverAddress = "http://192.168.1.5:3001";
 
   /// authentication
   static Uri adminLogin = Uri.parse("$serverAddress/Admin/adminlogin");
@@ -51,6 +51,9 @@ class Apis {
 
   static Uri toggleStatus({required String id}) =>
       Uri.parse("$serverAddress/memberplan/toggleStatus/$id");
+
+  /// subscriptions
+  static Uri getAllSubscriptions = Uri.parse("$serverAddress/subscription/");
 
   /// Manage banner
   static Uri getAllBanner = Uri.parse("$serverAddress/banner/getAll");

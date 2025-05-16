@@ -1,5 +1,7 @@
 import 'package:pro_deals_admin/utils/imports.dart';
 
+import '../subscriptions/subscriptions.dart';
+
 class panel extends GetView<PanelController> {
   const panel({super.key});
 
@@ -169,11 +171,22 @@ class panel extends GetView<PanelController> {
                 ),
                 PaneItem(
                   icon: const Icon(
-                    FluentIcons.admin_c_logo_inverse32,
+                    FluentIcons.user_sync,
                     size: 18,
                   ),
                   onTap: () {
                     controller.select.value = 10;
+                  },
+                  body: const Subscriptions(),
+                  title: const Text('Subscribed Users'),
+                ),
+                PaneItem(
+                  icon: const Icon(
+                    FluentIcons.admin_c_logo_inverse32,
+                    size: 18,
+                  ),
+                  onTap: () {
+                    controller.select.value = 11;
                   },
                   body: const ManageCMS(),
                   title: const Text('Manage CMS Pages'),
@@ -184,7 +197,7 @@ class panel extends GetView<PanelController> {
                     size: 18,
                   ),
                   onTap: () {
-                    controller.select.value = 11;
+                    controller.select.value = 12;
                   },
                   body: const ManageCoupons(),
                   title: const Text('Manage Coupons'),
@@ -195,7 +208,7 @@ class panel extends GetView<PanelController> {
                     size: 18,
                   ),
                   onTap: () {
-                    controller.select.value = 12;
+                    controller.select.value = 13;
                   },
                   body: const SettingScreen(),
                   title: const Text('Setting'),
