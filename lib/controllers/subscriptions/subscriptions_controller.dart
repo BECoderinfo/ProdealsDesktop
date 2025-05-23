@@ -43,6 +43,7 @@ class SubscriptionsController extends GetxController {
       }
     } catch (e) {
       isError.value = false;
+      print(e.toString());
 
       GFToast.showToast(e.toString(), ctx);
     }

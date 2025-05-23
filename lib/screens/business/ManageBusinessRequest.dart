@@ -65,7 +65,7 @@ class ManageBusinessRequest extends GetView<ManageBusinessRequestController> {
                     3: FlexColumnWidth(),
                     4: FlexColumnWidth(),
                     5: FlexColumnWidth(),
-                    6: FlexColumnWidth(1.5),
+                    6: FlexColumnWidth(),
                   },
                   children: [
                     TableRow(
@@ -108,7 +108,7 @@ class ManageBusinessRequest extends GetView<ManageBusinessRequestController> {
                                 3: FlexColumnWidth(),
                                 4: FlexColumnWidth(),
                                 5: FlexColumnWidth(),
-                                6: FlexColumnWidth(1.5),
+                                6: FlexColumnWidth(),
                               },
                               defaultVerticalAlignment:
                                   TableCellVerticalAlignment.middle,
@@ -136,8 +136,12 @@ class ManageBusinessRequest extends GetView<ManageBusinessRequestController> {
                                               color: AppColor.black,
                                             )
                                           : Wrap(
-                                              runSpacing: 10,
-                                              spacing: 5,
+                                              direction: Axis.horizontal,
+                                              // Change from vertical to horizontal
+                                              spacing: 10,
+                                              // Horizontal space between buttons
+                                              runSpacing: 5,
+                                              // Vertical spacing if wrap is needed
                                               children: [
                                                 _actionButton(
                                                   icon: FluentIcons.accept,

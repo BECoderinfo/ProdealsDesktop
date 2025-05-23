@@ -49,7 +49,7 @@ class offers extends GetView<ManageOfferDealsController> {
               }),
               const Gap(20),
               Obx(() {
-                if (controller.isError.value || controller.allOffer.isEmpty) {
+                if (controller.isError.value) {
                   return const Gap(0);
                 }
                 return Container(

@@ -106,11 +106,7 @@ class ManageBanner extends GetView<ManageBannerController> {
           ),
           const Gap(20),
           Obx(
-            () => controller.isError.value ||
-                    (controller.type1.length +
-                            controller.type2.length +
-                            controller.type3.length) ==
-                        0
+            () => controller.isError.value
                 ? const Gap(0)
                 : Container(
                     padding: const EdgeInsets.symmetric(
@@ -1116,7 +1112,7 @@ class ManageBanner extends GetView<ManageBannerController> {
           ),
           const Gap(20),
           Obx(
-            () => controller.isError1.value || controller.requestList.isEmpty
+            () => controller.isError1.value
                 ? const Gap(0)
                 : Container(
                     padding: const EdgeInsets.symmetric(
