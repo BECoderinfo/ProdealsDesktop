@@ -4,8 +4,9 @@ class Apis {
   };
   static const Duration timeout = Duration(minutes: 5);
 
-  // static const String serverAddress = "http://141.148.196.197:3001";
-  static const String serverAddress = "http://192.168.1.4:3001";
+  static const String serverAddress = "http://141.148.196.197:3001";
+
+  // static const String serverAddress = "http://192.168.1.4:3001";
 
   /// authentication
   static Uri adminLogin = Uri.parse("$serverAddress/Admin/adminlogin");
